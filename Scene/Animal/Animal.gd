@@ -32,7 +32,7 @@ func setup() -> void:
 	_start = position				# Salva a posição inicial do animal para referência
 
 # Processamento físico contínuo (a cada frame de física)
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	update_debug_label() # Atualiza o texto de depuração
 
 # Atualiza o label de debug com informações úteis do estado atual
@@ -48,9 +48,38 @@ func update_debug_label() -> void:
 	ds += "_dragged_vector:%.1f, %.1f" % [_dragged_vector.x, _dragged_vector.y]
 	debug_label.text = ds # Atualiza o texto na tela
 
+#region drag
+
+# Inicia o processo de arrasto do objeto:
+func start_dragging() -> void:
+	arrow.show()    # - Mostra a seta visual (usada para indicar direção/força)
+	_drag_start = get_global_mouse_position() # - Salva a posição inicial do clique/touch do mouse para calcular a força depois
+
+#endregion
+
+
+#region state
+# Muda o estado atual do objeto de forma segura:
+func change_state(new_state: AnimalState) -> void:
+	if _state == new_state: # - Evita mudar se já estiver no mesmo estado
+		return # Evita repetição de lógica se já estiver no estado desejado
+	
+	# - Atualiza o estado e executa ações específicas de cada um via `match`
+	_state = new_state
+	
+	match _state:
+		# Quando entra no estado Drag (arrasto), inicia o comportamento de arrastar
+		AnimalState.Drag:
+			start_dragging()
+#endregion
+
+#region signals
 # Evento chamado quando há um clique ou interação com o corpo (ainda não implementado)
-func _on_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
-	pass # Aqui será implementado o comportamento de arrastar e soltar
+func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
+	# - Se a ação configurada como "drag" for pressionada e o estado for Ready
+	if event.is_action_pressed("drag") and _state == AnimalState.Ready: 
+		#   (ou seja, o objeto está pronto para ser arrastado), muda o estado para Drag
+		change_state(AnimalState.Drag)
 
 # Evento chamado quando o corpo sai da tela (útil para resetar ou remover o objeto)
 func _on_visible_on_screen_notifier_2d_screen_exited() -> void:
@@ -62,4 +91,6 @@ func _on_sleeping_state_changed() -> void:
 
 # Evento chamado quando o corpo colide com outro (ex: tocar som ou pontuar)
 func _on_body_entered(body: Node) -> void:
-	pass # Pode reagir à colisão com outros objetos
+	pass # Pode reagir à colisão com outros objetos 
+
+#endregion
