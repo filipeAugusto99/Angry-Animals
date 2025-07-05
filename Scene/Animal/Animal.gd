@@ -6,6 +6,9 @@ extends RigidBody2D
 # Enum para definir os estados possíveis do animal
 enum AnimalState { Ready, Drag, Release }
 
+const DRAG_LIM_MAX: Vector2 = Vector2(0, 60)
+const DRAG_LIM_MIN: Vector2 = Vector2(-60, 0)
+
 # Referências para nós filhos, inicializadas quando o nó está pronto
 @onready var arrow: Sprite2D = $Arrow  # Seta visual de direção e força
 @onready var debug_label: Label = $DebugLabel # Label para mostrar informações de depuração
@@ -33,6 +36,7 @@ func setup() -> void:
 
 # Processamento físico contínuo (a cada frame de física)
 func _physics_process(_delta: float) -> void:
+	update_state()
 	update_debug_label() # Atualiza o texto de depuração
 
 # Atualiza o label de debug com informações úteis do estado atual
@@ -55,10 +59,30 @@ func start_dragging() -> void:
 	arrow.show()    # - Mostra a seta visual (usada para indicar direção/força)
 	_drag_start = get_global_mouse_position() # - Salva a posição inicial do clique/touch do mouse para calcular a força depois
 
+func handle_dragging() -> void:
+	var new_drag_vector: Vector2 = get_global_mouse_position() - _drag_start
+	
+	new_drag_vector = new_drag_vector.clamp(
+		DRAG_LIM_MIN, DRAG_LIM_MAX
+	)
+	
+	var diff: Vector2 = new_drag_vector - _dragged_vector
+	
+	if diff.length() > 0 and stretch_sound.playing == false:
+		stretch_sound.play()
+	
+	_dragged_vector = new_drag_vector	
+	position = _start + _dragged_vector
+	
+	
 #endregion
 
-
 #region state
+func update_state() -> void:
+	match _state:
+		AnimalState.Drag:
+			handle_dragging()
+
 # Muda o estado atual do objeto de forma segura:
 func change_state(new_state: AnimalState) -> void:
 	if _state == new_state: # - Evita mudar se já estiver no mesmo estado
@@ -77,7 +101,7 @@ func change_state(new_state: AnimalState) -> void:
 # Evento chamado quando há um clique ou interação com o corpo (ainda não implementado)
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
 	# - Se a ação configurada como "drag" for pressionada e o estado for Ready
-	if event.is_action_pressed("drag") and _state == AnimalState.Ready: 
+	if event.is_action_pressed("drag") and _state == AnimalState.Ready:
 		#   (ou seja, o objeto está pronto para ser arrastado), muda o estado para Drag
 		change_state(AnimalState.Drag)
 
@@ -91,6 +115,6 @@ func _on_sleeping_state_changed() -> void:
 
 # Evento chamado quando o corpo colide com outro (ex: tocar som ou pontuar)
 func _on_body_entered(body: Node) -> void:
-	pass # Pode reagir à colisão com outros objetos 
+	pass # Pode reagir à colisão com outros objetos
 
 #endregion
