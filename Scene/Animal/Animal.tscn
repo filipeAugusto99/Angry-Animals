@@ -35,9 +35,10 @@ shape = SubResource("CircleShape2D_ekmk5")
 
 [node name="DebugLabel" type="Label" parent="."]
 offset_left = -24.0
-offset_top = -53.0
+offset_top = -120.0
 offset_right = 27.0
-offset_bottom = -30.0
+offset_bottom = -97.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "ascsal "
 
 [node name="StretchSound" type="AudioStreamPlayer2D" parent="."]
@@ -51,5 +52,7 @@ stream = ExtResource("4_eu6sv")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
 
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
 [connection signal="input_event" from="." to="." method="_on_input_event"]
+[connection signal="sleeping_state_changed" from="." to="." method="_on_sleeping_state_changed"]
 [connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]
