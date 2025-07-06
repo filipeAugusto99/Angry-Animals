@@ -66,6 +66,12 @@ func update_debug_label() -> void:
 
 #region drag
 
+func update_arrow_scale() -> void:
+	var imp_len: float = calculate_impulse().length()
+	var perc: float = clamp(imp_len / IMPULSE_MAX, 0.0, 1.0)
+	arrow.scale.x = lerp(_arrow_scale_x, _arrow_scale_x * 2, perc )
+	arrow.rotation = (_start - position).angle()
+
 # Inicia o processo de arrasto do objeto:
 func start_dragging() -> void:
 	arrow.show()    # - Mostra a seta visual (usada para indicar direção/força)
@@ -94,6 +100,8 @@ func handle_dragging() -> void:
 	# Atualiza a posição do objeto na cena com base na posição inicial + vetor de arrasto
 	position = _start + _dragged_vector
 	
+	update_arrow_scale()
+	
 #endregion
 
 #region release
@@ -112,7 +120,7 @@ func start_release() -> void:
 	arrow.show()  # Garante que a seta ainda esteja visível (pode ser ocultada depois se preferir)
 	launch_sound.play() # Toca o som de lançamento
 	freeze = false # Descongela o corpo para que ele reaja à física (gravidade, colisão, etc.)
-	apply_central_impulse(calculate_impulse())
+	apply_central_impulse(calculate_impulse()) #aplica uma força instantânea (um impulso) ao corpo físico (RigidBody2D) NO CENTRO do objeto, simulando um lançamento ou "empurrão".
 	
 #endregion
 
