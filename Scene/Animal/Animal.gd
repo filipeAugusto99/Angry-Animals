@@ -9,6 +9,8 @@ enum AnimalState { Ready, Drag, Release }
 
 const DRAG_LIM_MAX: Vector2 = Vector2(0, 60)
 const DRAG_LIM_MIN: Vector2 = Vector2(-60, 0)
+const IMPULSE_MULT: float = 20.0
+const IMPULSE_MAX: float = 1200.0
 
 # Referências para nós filhos, inicializadas quando o nó está pronto
 @onready var arrow: Sprite2D = $Arrow  # Seta visual de direção e força
@@ -98,11 +100,20 @@ func handle_dragging() -> void:
 # Região responsável por iniciar o comportamento de "soltura" (release),
 # ou seja, o momento em que o objeto é lançado após o arrasto.
 
+# Define uma função que calcula o vetor de impulso (força de lançamento)
+func calculate_impulse() -> Vector2:
+	# Retorna o vetor de arrasto multiplicado por um fator de impulso (e invertido)
+	# - _dragged_vector: representa o quanto o objeto foi puxado (arrastado)
+	# - IMPULSE_MULT: é um multiplicador que ajusta a força final do lançamento
+	# - O sinal negativo inverte o vetor, pois o lançamento é na direção oposta ao arrasto
+	return _dragged_vector * -IMPULSE_MULT
+	
 func start_release() -> void:
 	arrow.show()  # Garante que a seta ainda esteja visível (pode ser ocultada depois se preferir)
 	launch_sound.play() # Toca o som de lançamento
 	freeze = false # Descongela o corpo para que ele reaja à física (gravidade, colisão, etc.)
-
+	apply_central_impulse(calculate_impulse())
+	
 #endregion
 
 #region state
