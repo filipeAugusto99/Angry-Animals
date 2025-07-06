@@ -1,8 +1,9 @@
+#region
+
 # Esse script controla o comportamento de um "animal" que pode ser arrastado e lançado
 # Herda de RigidBody2D para usar física realista (gravidade, colisão, etc.)
 
 extends RigidBody2D
-
 # Enum para definir os estados possíveis do animal
 enum AnimalState { Ready, Drag, Release }
 
@@ -23,6 +24,13 @@ var _start: Vector2 = Vector2.ZERO # Posição inicial do corpo (ponto de origem
 var _drag_start: Vector2 = Vector2.ZERO  # Posição onde o clique (ou toque) começou
 var _dragged_vector: Vector2 = Vector2.ZERO # Vetor que representa o quanto o objeto foi arrastado
 var _arrow_scale_x: float = 0.0 # Escala original da seta na horizontal (usado para restaurar ou ajustar)
+
+# Trata entradas que não foram capturadas diretamente por um nó com foco.
+# Aqui detecta quando o jogador solta o botão de arrasto e muda o estado para "Release".
+func _unhandled_input(event: InputEvent) -> void:
+	if _state == AnimalState.Drag and event.is_action_released("drag"):
+		change_state(AnimalState.Release)
+		call_deferred("change_state", AnimalState.Release)  # Garante que a transição ocorra fora do ciclo atual de entrada
 
 # Função executada quando o nó entra na cena
 func _ready() -> void:
@@ -52,6 +60,8 @@ func update_debug_label() -> void:
 	ds += "_dragged_vector:%.1f, %.1f" % [_dragged_vector.x, _dragged_vector.y]
 	debug_label.text = ds # Atualiza o texto na tela
 
+#endregion
+
 #region drag
 
 # Inicia o processo de arrasto do objeto:
@@ -59,43 +69,66 @@ func start_dragging() -> void:
 	arrow.show()    # - Mostra a seta visual (usada para indicar direção/força)
 	_drag_start = get_global_mouse_position() # - Salva a posição inicial do clique/touch do mouse para calcular a força depois
 
+# Calcula e aplica o comportamento visual e físico do arrasto
 func handle_dragging() -> void:
+	# Calcula o vetor entre a posição atual do mouse e a posição onde o arrasto começou
 	var new_drag_vector: Vector2 = get_global_mouse_position() - _drag_start
 	
+	# Limita o vetor de arrasto dentro de um intervalo mínimo e máximo (impede arrasto exagerado)
 	new_drag_vector = new_drag_vector.clamp(
 		DRAG_LIM_MIN, DRAG_LIM_MAX
 	)
 	
+	# Calcula a diferença entre o vetor anterior e o novo
 	var diff: Vector2 = new_drag_vector - _dragged_vector
 	
+	# Se houve movimento e o som de esticada ainda não está tocando, toca o som
 	if diff.length() > 0 and stretch_sound.playing == false:
 		stretch_sound.play()
 	
+	# Atualiza o vetor de arrasto armazenado
 	_dragged_vector = new_drag_vector	
-	position = _start + _dragged_vector
 	
+	# Atualiza a posição do objeto na cena com base na posição inicial + vetor de arrasto
+	position = _start + _dragged_vector
 	
 #endregion
 
+#region release
+# Região responsável por iniciar o comportamento de "soltura" (release),
+# ou seja, o momento em que o objeto é lançado após o arrasto.
+
+func start_release() -> void:
+	arrow.show()  # Garante que a seta ainda esteja visível (pode ser ocultada depois se preferir)
+	launch_sound.play() # Toca o som de lançamento
+	freeze = false # Descongela o corpo para que ele reaja à física (gravidade, colisão, etc.)
+
+#endregion
+
 #region state
+# Região que lida com a lógica de atualização de estado e executa ações específicas para cada estado.
+
+# Atualiza o comportamento do objeto com base em seu estado atua
 func update_state() -> void:
 	match _state:
 		AnimalState.Drag:
-			handle_dragging()
+			handle_dragging()  # Se estiver sendo arrastado, atualiza a posição em tempo real
 
 # Muda o estado atual do objeto de forma segura:
 func change_state(new_state: AnimalState) -> void:
 	if _state == new_state: # - Evita mudar se já estiver no mesmo estado
 		return # Evita repetição de lógica se já estiver no estado desejado
 	
-	# - Atualiza o estado e executa ações específicas de cada um via `match`
-	_state = new_state
+	_state = new_state  # Atualiza o estado interno
 	
 	match _state:
 		# Quando entra no estado Drag (arrasto), inicia o comportamento de arrastar
 		AnimalState.Drag:
-			start_dragging()
+			start_dragging() # Inicia o arrasto
+		AnimalState.Release:
+			start_release() # Executa a lógica de soltura (lançamento)
 #endregion
+
 
 #region signals
 # Evento chamado quando há um clique ou interação com o corpo (ainda não implementado)
