@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cawvb0565ro86"]
+
+[ext_resource type="Script" uid="uid://ddhu2cn4roh4x" path="res://Globals/SignalHub.gd" id="1_4ngsx"]
+
+[node name="SignalHub" type="Node2D"]
+script = ExtResource("1_4ngsx")
+
+[connection signal="on_animal_died" from="." to="." method="emit_on_animal_died"]

@@ -14,6 +14,10 @@ config/name="Angry Animals"
 run/main_scene="uid://ccu1g1elrmy0c"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 
+[autoload]
+
+SignalHub="*res://Globals/SignalHub.gd"
+
 [display]
 
 window/stretch/mode="canvas_items"

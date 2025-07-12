@@ -4,6 +4,9 @@
 # Herda de RigidBody2D para usar física realista (gravidade, colisão, etc.)
 
 extends RigidBody2D
+
+class_name Animal
+
 # Enum para definir os estados possíveis do animal
 enum AnimalState { Ready, Drag, Release }
 
@@ -50,6 +53,9 @@ func _physics_process(_delta: float) -> void:
 	update_debug_label() # Atualiza o texto de depuração
 
 # Atualiza o label de debug com informações úteis do estado atual
+#endregion
+
+#region misc
 func update_debug_label() -> void:
 	var ds: String = "ST:%s SL:%s FR:%s\n" % [
 		AnimalState.keys()[_state], # Estado atual como string
@@ -62,6 +68,10 @@ func update_debug_label() -> void:
 	ds += "_dragged_vector:%.1f, %.1f" % [_dragged_vector.x, _dragged_vector.y]
 	debug_label.text = ds # Atualiza o texto na tela
 
+func die() -> void:
+	SignalHub.emit_on_animal_died()
+	queue_free()
+	
 #endregion
 
 #region drag
@@ -148,7 +158,6 @@ func change_state(new_state: AnimalState) -> void:
 			start_release() # Executa a lógica de soltura (lançamento)
 #endregion
 
-
 #region signals
 # Evento chamado quando há um clique ou interação com o corpo (ainda não implementado)
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -159,8 +168,8 @@ func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> voi
 
 # Evento chamado quando o corpo sai da tela (útil para resetar ou remover o objeto)
 func _on_visible_on_screen_notifier_2d_screen_exited() -> void:
-	pass # Pode ser usado para remover ou reiniciar o objeto
-
+	die()
+	
 # Evento chamado quando o estado de "dormindo" muda (útil para ativar física ou efeitos)
 func _on_sleeping_state_changed() -> void:
 	pass # Pode tocar um som ou mudar o estado
