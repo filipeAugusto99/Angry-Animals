@@ -172,10 +172,15 @@ func _on_visible_on_screen_notifier_2d_screen_exited() -> void:
 	
 # Evento chamado quando o estado de "dormindo" muda (útil para ativar física ou efeitos)
 func _on_sleeping_state_changed() -> void:
-	pass # Pode tocar um som ou mudar o estado
-
+	if sleeping == true:
+		for body in get_colliding_bodies():
+			if body is Cup:
+				body.die()
+		call_deferred("die")
+		
 # Evento chamado quando o corpo colide com outro (ex: tocar som ou pontuar)
 func _on_body_entered(body: Node) -> void:
-	pass # Pode reagir à colisão com outros objetos
-
+	if body is Cup and kick_sound.playing == false:
+		kick_sound.play()
+	
 #endregion
