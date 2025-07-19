@@ -131,6 +131,7 @@ func start_release() -> void:
 	launch_sound.play() # Toca o som de lançamento
 	freeze = false # Descongela o corpo para que ele reaja à física (gravidade, colisão, etc.)
 	apply_central_impulse(calculate_impulse()) #aplica uma força instantânea (um impulso) ao corpo físico (RigidBody2D) NO CENTRO do objeto, simulando um lançamento ou "empurrão".
+	SignalHub.emit_on_attempt_made()
 	
 #endregion
 
