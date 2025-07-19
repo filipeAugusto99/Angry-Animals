@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://mq7mgeecu3ib"]
+[gd_scene load_steps=6 format=3 uid="uid://mq7mgeecu3ib"]
 
 [ext_resource type="Texture2D" uid="uid://4oqcg0b2nrqb" path="res://assets/ui/panel_beige.png" id="1_kr7uc"]
 [ext_resource type="LabelSettings" uid="uid://c42m5keejt4f5" path="res://Resources/white_48_font.tres" id="2_c5jkv"]
+[ext_resource type="Script" uid="uid://dkfuashftpbg4" path="res://Scene/LevelButton/LevelButton.gd" id="2_wy0kv"]
 [ext_resource type="FontFile" uid="uid://bixy3sbx7k3vr" path="res://assets/fonts/LuckiestGuy-Regular.ttf" id="3_wy0kv"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_1307i"]
@@ -27,6 +28,7 @@ grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(50, 50)
 texture_normal = ExtResource("1_kr7uc")
+script = ExtResource("2_wy0kv")
 
 [node name="MC" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -53,3 +55,6 @@ text = "1000"
 label_settings = SubResource("LabelSettings_1307i")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]
