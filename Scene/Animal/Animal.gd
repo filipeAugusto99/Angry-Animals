@@ -5,15 +5,19 @@
 
 extends RigidBody2D
 
+
 class_name Animal
+
 
 # Enum para definir os estados possíveis do animal
 enum AnimalState { Ready, Drag, Release }
+
 
 const DRAG_LIM_MAX: Vector2 = Vector2(0, 60)
 const DRAG_LIM_MIN: Vector2 = Vector2(-60, 0)
 const IMPULSE_MULT: float = 20.0
 const IMPULSE_MAX: float = 1200.0
+
 
 # Referências para nós filhos, inicializadas quando o nó está pronto
 @onready var arrow: Sprite2D = $Arrow  # Seta visual de direção e força
@@ -29,6 +33,7 @@ var _start: Vector2 = Vector2.ZERO # Posição inicial do corpo (ponto de origem
 var _drag_start: Vector2 = Vector2.ZERO  # Posição onde o clique (ou toque) começou
 var _dragged_vector: Vector2 = Vector2.ZERO # Vetor que representa o quanto o objeto foi arrastado
 var _arrow_scale_x: float = 0.0 # Escala original da seta na horizontal (usado para restaurar ou ajustar)
+
 
 # Trata entradas que não foram capturadas diretamente por um nó com foco.
 # Aqui detecta quando o jogador solta o botão de arrasto e muda o estado para "Release".
@@ -72,6 +77,30 @@ func die() -> void:
 	SignalHub.emit_on_animal_died()
 	queue_free()
 	
+#endregion
+
+#region state
+# Região que lida com a lógica de atualização de estado e executa ações específicas para cada estado.
+
+# Atualiza o comportamento do objeto com base em seu estado atua
+func update_state() -> void:
+	match _state:
+		AnimalState.Drag:
+			handle_dragging()  # Se estiver sendo arrastado, atualiza a posição em tempo real
+
+# Muda o estado atual do objeto de forma segura:
+func change_state(new_state: AnimalState) -> void:
+	if _state == new_state: # - Evita mudar se já estiver no mesmo estado
+		return # Evita repetição de lógica se já estiver no estado desejado
+	
+	_state = new_state  # Atualiza o estado interno
+	
+	match _state:
+		# Quando entra no estado Drag (arrasto), inicia o comportamento de arrastar
+		AnimalState.Drag:
+			start_dragging() # Inicia o arrasto
+		AnimalState.Release:
+			start_release() # Executa a lógica de soltura (lançamento)
 #endregion
 
 #region drag
@@ -135,41 +164,19 @@ func start_release() -> void:
 	
 #endregion
 
-#region state
-# Região que lida com a lógica de atualização de estado e executa ações específicas para cada estado.
-
-# Atualiza o comportamento do objeto com base em seu estado atua
-func update_state() -> void:
-	match _state:
-		AnimalState.Drag:
-			handle_dragging()  # Se estiver sendo arrastado, atualiza a posição em tempo real
-
-# Muda o estado atual do objeto de forma segura:
-func change_state(new_state: AnimalState) -> void:
-	if _state == new_state: # - Evita mudar se já estiver no mesmo estado
-		return # Evita repetição de lógica se já estiver no estado desejado
-	
-	_state = new_state  # Atualiza o estado interno
-	
-	match _state:
-		# Quando entra no estado Drag (arrasto), inicia o comportamento de arrastar
-		AnimalState.Drag:
-			start_dragging() # Inicia o arrasto
-		AnimalState.Release:
-			start_release() # Executa a lógica de soltura (lançamento)
-#endregion
-
 #region signals
-# Evento chamado quando há um clique ou interação com o corpo (ainda não implementado)
+# Evento chamado quando há um clique ou interação com o corpo.
 func _on_input_event(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
-	# - Se a ação configurada como "drag" for pressionada e o estado for Ready
+	# - Se a ação configurada como "drag" for pressionada e o esta o for Ready
 	if event.is_action_pressed("drag") and _state == AnimalState.Ready:
 		#   (ou seja, o objeto está pronto para ser arrastado), muda o estado para Drag
 		change_state(AnimalState.Drag)
 
+
 # Evento chamado quando o corpo sai da tela (útil para resetar ou remover o objeto)
 func _on_visible_on_screen_notifier_2d_screen_exited() -> void:
 	die()
+	
 	
 # Evento chamado quando o estado de "dormindo" muda (útil para ativar física ou efeitos)
 func _on_sleeping_state_changed() -> void:
@@ -178,6 +185,7 @@ func _on_sleeping_state_changed() -> void:
 			if body is Cup:
 				body.die()
 		call_deferred("die")
+		
 		
 # Evento chamado quando o corpo colide com outro (ex: tocar som ou pontuar)
 func _on_body_entered(body: Node) -> void:
