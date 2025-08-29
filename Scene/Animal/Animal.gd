@@ -15,6 +15,8 @@ enum AnimalState { Ready, Drag, Release }
 
 const DRAG_LIM_MAX: Vector2 = Vector2(0, 60)
 const DRAG_LIM_MIN: Vector2 = Vector2(-60, 0)
+
+# - IMPULSE_MULT: é um multiplicador que ajusta a força final do lançamento
 const IMPULSE_MULT: float = 20.0
 const IMPULSE_MAX: float = 1200.0
 
@@ -54,7 +56,7 @@ func setup() -> void:
 
 # Processamento físico contínuo (a cada frame de física)
 func _physics_process(_delta: float) -> void:
-	update_state()
+	update_state() # Atualiza o Estado do Animal
 	update_debug_label() # Atualiza o texto de depuração
 
 # Atualiza o label de debug com informações úteis do estado atual
@@ -134,7 +136,7 @@ func handle_dragging() -> void:
 		stretch_sound.play()
 	
 	# Atualiza o vetor de arrasto armazenado
-	_dragged_vector = new_drag_vector	
+	_dragged_vector = new_drag_vector
 	
 	# Atualiza a posição do objeto na cena com base na posição inicial + vetor de arrasto
 	position = _start + _dragged_vector
@@ -150,8 +152,6 @@ func handle_dragging() -> void:
 # Define uma função que calcula o vetor de impulso (força de lançamento)
 func calculate_impulse() -> Vector2:
 	# Retorna o vetor de arrasto multiplicado por um fator de impulso (e invertido)
-	# - _dragged_vector: representa o quanto o objeto foi puxado (arrastado)
-	# - IMPULSE_MULT: é um multiplicador que ajusta a força final do lançamento
 	# - O sinal negativo inverte o vetor, pois o lançamento é na direção oposta ao arrasto
 	return _dragged_vector * -IMPULSE_MULT
 	
