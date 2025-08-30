@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://de2wv2mmfoqw" path="res://assets/scene/colored_castle.png" id="1_7tyto"]
 [ext_resource type="Script" uid="uid://w735g8aw2nsm" path="res://Scene/LevelBase/LevelBase.gd" id="1_xw4qm"]
-[ext_resource type="PackedScene" uid="uid://tpy5nfw40omt" path="res://Globals/Water.tscn" id="3_1p5gn"]
+[ext_resource type="PackedScene" uid="uid://tpy5nfw40omt" path="res://Scene/Water/Water.tscn" id="3_1p5gn"]
 [ext_resource type="PackedScene" uid="uid://ccpt7gwxjumag" path="res://Scene/GameUi/GameUi.tscn" id="5_pbxni"]
 
 [node name="LevelBase" type="Node2D"]
