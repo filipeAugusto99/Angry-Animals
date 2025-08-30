@@ -67,7 +67,6 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 grow_horizontal = 2
-rotation = 0.0349066
 theme_override_constants/margin_top = 48
 
 [node name="Label" type="Label" parent="MarginContainer"]

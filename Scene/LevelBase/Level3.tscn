@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://deodur2b7l51m"]
 
-[ext_resource type="PackedScene" uid="uid://b4swvqvrddbww" path="res://Scene/LevelBase/LevelBase.tscn" id="1_ne0vn"]
+[ext_resource type="PackedScene" uid="uid://b4swvqvrddbww" path="res://assets/scene/LevelBase.tscn" id="1_ne0vn"]
 [ext_resource type="PackedScene" uid="uid://km3mxno3jbfl" path="res://Scene/Cup/Cup.tscn" id="2_d75fa"]
 
 [node name="Level3" instance=ExtResource("1_ne0vn")]
